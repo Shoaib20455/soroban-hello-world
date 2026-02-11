@@ -10,3 +10,13 @@ cargo test -- --nocapture
 
 
 https://api.github.com/repos/Shoaib20455/soroban-hello-world/attestations/sha256:CBOJWBVBIB7KUPIBWSNOVWVRWFPP2EUTI4ZSJ3BKKFTZSUEQEOO3DFOF
+
+stellar contract upload \
+  --network testnet \
+  --source-account alice \
+  --wasm target/wasm32v1-none/release/my_first_token.wasm
+
+stellar contract deploy \
+  --network testnet \
+  --source-account alice \
+  --wasm-hash d63fa6c22b0c4ef5439b9da994ace033d5945ee4ff27da7692add7fa0d1c6f4d
