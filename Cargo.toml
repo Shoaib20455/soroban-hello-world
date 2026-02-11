@@ -1,11 +1,15 @@
 [workspace]
 resolver = "2"
 members = [
-  "contracts/*",
+    "contracts/*",
 ]
 
 [workspace.dependencies]
-soroban-sdk = "25"
+soroban-sdk = "23.5.1"
+# OpenZeppelin libraries ko yahan define karne se manage karna asan ho jata hai
+stellar-tokens = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
+stellar-access = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
+stellar-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
 
 [profile.release]
 opt-level = "z"
@@ -17,7 +21,6 @@ panic = "abort"
 codegen-units = 1
 lto = true
 
-# For more information about this profile see https://soroban.stellar.org/docs/basic-tutorials/logging#cargotoml-profile
 [profile.release-with-logs]
 inherits = "release"
 debug-assertions = true

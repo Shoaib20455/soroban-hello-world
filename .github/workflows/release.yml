@@ -27,34 +27,35 @@ jobs:
 
       - name: Build and Optimize Contract
         run: |
-          # 1. Build with metadata
+          # 1. Build all contracts with metadata
           stellar contract build \
             --meta source_repo=github:${{ github.repository }} 
           
-          # 2. Optimize
-          stellar contract optimize --wasm target/wasm32v1-none/release/increment.wasm
+          # 2. Optimize the specific token WASM
+          # Note: Yahan 'my_first_token.wasm' use ho raha hai
+          stellar contract optimize --wasm target/wasm32v1-none/release/my_first_token.wasm
           
-          # 3. Use optimized file as the main artifact
-          cp target/wasm32v1-none/release/increment.optimized.wasm target/wasm32v1-none/release/increment.wasm
+          # 3. Rename optimized for artifact
+          cp target/wasm32v1-none/release/my_first_token.optimized.wasm target/wasm32v1-none/release/my_first_token.wasm
 
-      # 4. Upload the WASM file so you can download it
+      # 4. Upload the WASM file
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: increment-wasm-file
-          path: target/wasm32v1-none/release/increment.wasm
+          name: token-wasm-file
+          path: target/wasm32v1-none/release/my_first_token.wasm
 
       # 5. Build the attestation for verification
       - name: Build Attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: increment.wasm
-          subject-path: target/wasm32v1-none/release/increment.wasm
+          subject-name: my_first_token.wasm
+          subject-path: target/wasm32v1-none/release/my_first_token.wasm
 
-      # 6. Create a GitHub Release (Optional but recommended)
+      # 6. Create a GitHub Release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/wasm32v1-none/release/increment.wasm
+          files: target/wasm32v1-none/release/my_first_token.wasm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
