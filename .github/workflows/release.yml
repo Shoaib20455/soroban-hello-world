@@ -1,0 +1,44 @@
+name: Build and Verify
+on:
+  push:
+    tags:
+      - "v*" 
+
+permissions:
+  id-token: write
+  contents: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Rust
+        run: |
+          rustup update
+          rustup target add wasm32v1-none # Aapka folder isi target se banta hai
+
+      - name: Install Stellar CLI
+        uses: stellar/stellar-cli@v22.8.1
+        with:
+          version: 22.8.1
+
+      - name: Build and Optimize Contract
+        run: |
+          # 1. Build with metadata
+          stellar contract build \
+            --meta source_repo=github:${{ github.repository }} 
+          
+          # 2. Optimize (Path updated to match your screenshot)
+          stellar contract optimize --wasm target/wasm32v1-none/release/increment.wasm
+          
+          # 3. Rename for consistency (optional but helpful)
+          cp target/wasm32v1-none/release/increment.optimized.wasm target/wasm32v1-none/release/increment.wasm
+
+      - name: Build Attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: increment.wasm
+          subject-path: target/wasm32v1-none/release/increment.wasm

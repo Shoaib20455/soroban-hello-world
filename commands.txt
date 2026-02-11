@@ -1,0 +1,8 @@
+stellar contract init soroban-hello-world
+cargo test
+stellar contract build
+stellar contract optimize --wasm target/wasm32v1-none/release/hello_world.wasm
+
+cargo test -- --nocapture
+
+733229d09eb4bb8c9a48ac8795a2ead4304e9fd9be42d6e50948f7f4046c1850
