@@ -20,3 +20,23 @@ stellar contract deploy \
   --network testnet \
   --source-account alice \
   --wasm-hash d63fa6c22b0c4ef5439b9da994ace033d5945ee4ff27da7692add7fa0d1c6f4d
+
+
+
+  stellar contract invoke \
+  --network testnet \
+  --source-account alice \
+  --id CBDI3JPQD3OZUO5GB6LCEM4OI4DVWZMXUUXF6G5JX3WV5JSWY2RLYGCM \
+  -- \
+  balance \
+  --account GCCMPZDYWW4SJ7DBVJ7X6UKB25OW2CXZW6ONXCQEWBVWLCM66CTDVOKL
+
+
+  stellar contract invoke \
+  --network testnet \
+  --source-account alice \
+  --id CBDI3JPQD3OZUO5GB6LCEM4OI4DVWZMXUUXF6G5JX3WV5JSWY2RLYGCM \
+  -- \
+  mint \
+  --account [RECIPIENT_ADDRESS] \
+  --amount 50000000000000
