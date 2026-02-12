@@ -6,10 +6,10 @@ stellar contract optimize --wasm target/wasm32v1-none/release/hello_world.wasm
 cargo test
 cargo test -- --nocapture
 
-517ced94cc1a758c6fe79993d109830272f61afa43ba5c13a9757214c9af9e58
 
+git tag v1.0.8
+git push origin v1.0.8
 
-https://api.github.com/repos/Shoaib20455/soroban-hello-world/attestations/sha256:CBOJWBVBIB7KUPIBWSNOVWVRWFPP2EUTI4ZSJ3BKKFTZSUEQEOO3DFOF
 
 stellar contract upload \
   --network testnet \
