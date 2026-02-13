@@ -1,47 +1,96 @@
-// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Stellar Soroban Contracts ^0.6.0
 #![no_std]
-
 use soroban_sdk::{
-    Address, contract, contractimpl, Env, MuxedAddress, String, Symbol, Vec
+    contract, contracterror, contractimpl, contracttype, token, Address, Env, panic_with_error
 };
-use stellar_access::ownable::{self as ownable, Ownable};
-use stellar_macros::only_owner;
-use stellar_tokens::fungible::{Base, burnable::FungibleBurnable, FungibleToken};
+
+
+#[contracterror]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u32)]
+pub enum RewardError {
+    AlreadyInitialized = 1,
+    NotAdmin = 2,
+    GameNotFound = 3,
+}
+
+
+#[contracttype]
+pub enum DataKey {
+    Admin,
+    TokenID,
+    GameReward(u32),
+}
 
 #[contract]
-pub struct MyFirstToken;
+pub struct GameRewardContract;
 
 #[contractimpl]
-impl MyFirstToken {
-    pub fn __constructor(e: &Env, recipient: Address, owner: Address) {
-        Base::set_metadata(e, 7, String::from_str(e, "MyFirstToken"), String::from_str(e, "MFTK"));
-        Base::mint(e, &recipient, 10000000000000000);
-        ownable::set_owner(e, &owner);
+impl GameRewardContract {
+    pub fn initialize(env: Env, admin: Address, token_id: Address) {
+        if env.storage().instance().has(&DataKey::Admin) {
+            panic_with_error!(&env, RewardError::AlreadyInitialized);
+        }
+
+        admin.require_auth();
+
+        env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage().instance().set(&DataKey::TokenID, &token_id);
     }
 
-    #[only_owner]
-    pub fn mint(e: &Env, account: Address, amount: i128) {
-        Base::mint(e, &account, amount);
+
+    pub fn add_game_type(env: Env, game_id: u32, reward_amount: i128) {
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        admin.require_auth();
+
+        env.storage().persistent().set(&DataKey::GameReward(game_id), &reward_amount);
+    }
+
+    pub fn distribute_reward(env: Env, to: Address, game_id: u32) {
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        admin.require_auth();
+
+        let reward_key = DataKey::GameReward(game_id);
+        if !env.storage().persistent().has(&reward_key) {
+             panic_with_error!(&env, RewardError::GameNotFound);
+        }
+
+        let amount: i128 = env.storage().persistent().get(&reward_key).unwrap();
+
+        let token_id: Address = env.storage().instance().get(&DataKey::TokenID).unwrap();
+        let token_client = token::Client::new(&env, &token_id);
+        let contract_address = env.current_contract_address();
+
+        token_client.transfer(&contract_address, &to, &amount);
+
+        env.events().publish(
+            (game_id, "reward_distributed"),
+            to
+        );
+    }
+
+    /// Withdraw tokens from the contract (admin only)
+    /// This allows recovery of stuck tokens
+    pub fn withdraw(env: Env, to: Address, amount: i128) {
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        admin.require_auth();
+
+        let token_id: Address = env.storage().instance().get(&DataKey::TokenID).unwrap();
+        let token_client = token::Client::new(&env, &token_id);
+        let contract_address = env.current_contract_address();
+
+        token_client.transfer(&contract_address, &to, &amount);
+
+        env.events().publish(
+            ("withdraw",),
+            (to.clone(), amount)
+        );
+    }
+
+    /// Upgrade the contract to a new WASM hash (admin only)
+    pub fn upgrade(env: Env, new_wasm_hash: soroban_sdk::BytesN<32>) {
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        admin.require_auth();
+
+        env.deployer().update_current_contract_wasm(new_wasm_hash);
     }
 }
-
-#[contractimpl(contracttrait)]
-impl FungibleToken for MyFirstToken {
-    type ContractType = Base;
-
-}
-
-//
-// Extensions
-//
-
-#[contractimpl(contracttrait)]
-impl FungibleBurnable for MyFirstToken {}
-
-//
-// Utils
-//
-
-#[contractimpl(contracttrait)]
-impl Ownable for MyFirstToken {}

@@ -16,6 +16,6 @@ jobs:
     with:
       release_name: ${{ github.ref_name }}
       relative_path: 'contracts/MyFirstToken' # Aapke contract folder ka rasta
-      package: 'my_first_token'              # Cargo.toml wala name
+      package: 'game_reward_contract'              # Cargo.toml wala name
     secrets:
       release_token: ${{ secrets.GITHUB_TOKEN }}
