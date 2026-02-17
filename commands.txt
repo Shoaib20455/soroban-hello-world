@@ -19,7 +19,7 @@ stellar contract upload \
 stellar contract deploy \
   --network testnet \
   --source-account alice \
-  --wasm-hash d63fa6c22b0c4ef5439b9da994ace033d5945ee4ff27da7692add7fa0d1c6f4d
+  --wasm-hash c63ebabe79fa56f19bc5f123b044bab336fb3d7cf384201e0c709b79d3ca88b1
 
 
 
@@ -40,3 +40,17 @@ stellar contract deploy \
   mint \
   --account [RECIPIENT_ADDRESS] \
   --amount 50000000000000
+
+  stellar contract invoke \
+  --network testnet \
+  --source-account alice \
+  --id CDXJPOC62TSFCPEJ5GBODTFYQZZ2UB3PYPN62LBBNQYERXPPT23HKDG6 \
+  -- \
+  initialize \
+  --admin alice \
+  --token_id CC5W7ZYLS5LJTMBDAMX5ZVRFZTFN2NP7C2EYXGNMGQYFFOMY76W6KQWH
+
+
+
+
+  https://developers.stellar.org/docs/build/guides/fees/analyzing-smart-contract-cost
