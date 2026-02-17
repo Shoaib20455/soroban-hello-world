@@ -14,7 +14,7 @@ git push origin v1.0.8
 stellar contract upload \
   --network testnet \
   --source-account alice \
-  --wasm target/wasm32v1-none/release/my_first_token.wasm
+  --wasm target/wasm32v1-none/release/game_reward_contract_v0.1.0.wasm
 
 stellar contract deploy \
   --network testnet \
