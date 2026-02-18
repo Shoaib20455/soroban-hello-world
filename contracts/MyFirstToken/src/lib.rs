@@ -103,25 +103,16 @@ impl GameRewardContract {
         env.events().publish((game_id, "reward_distributed"), to);
     }
 
-    pub fn get_player_games(env: Env, player: Address) -> Vec<u32> {
-    let history_key = DataKey::PlayerGames(player);
+    pub fn get_player_status(env: Env, player: Address, game_id: u32) -> bool {
+    let claim_key = DataKey::GameClaimed(game_id, player);
 
-    let games: Vec<u32> =
-        env.storage()
-            .persistent()
-            .get(&history_key)
-            .unwrap_or(Vec::new(&env));
-
-    // Agar vector empty hai to empty return karo
-    if games.len() == 0 {
-        return Vec::new(&env);
+    if env.storage().persistent().has(&claim_key) {
+        true
+    } else {
+        false
     }
-
-    // Sirf last element return karna
-    let mut last_game: Vec<u32> = Vec::new(&env);
-    last_game.push_back(games.get_unchecked(games.len() - 1));
-    last_game
 }
+
 
 
     pub fn withdraw(env: Env, to: Address, amount: i128) {
