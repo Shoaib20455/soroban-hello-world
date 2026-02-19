@@ -5,7 +5,8 @@ stellar contract build --meta source_repo=github:shoaibmk/soroban-hello-world
 stellar contract optimize --wasm target/wasm32v1-none/release/hello_world.wasm
 cargo test
 cargo test -- --nocapture
-
+cargo clean
+cargo build --target wasm32v1-none
 
 git tag v1.0.8
 git push origin v1.0.8
@@ -82,3 +83,108 @@ stellar contract invoke \
   --game_id 1
 
   https://developers.stellar.org/docs/build/guides/fees/analyzing-smart-contract-cost
+
+
+
+  -------
+
+
+
+  Chaliye, shuru karte hain! Hum aik naya token banayenge jiska naam hum "ZITOKEN" rakhte hain. Main aapko step-by-step commands de raha hoon jo aap terminal mein copy-paste kar sakte hain.
+
+Step 1: Network aur Accounts Setup
+Pehle confirm karein ke aap testnet use kar rahe hain aur issuer/admin accounts banayein.
+
+Bash
+# Testnet use karein
+stellar network use testnet
+
+# Issuer (Jo token paida karega)
+stellar keys generate issuer
+
+# Admin (Jo contract ko control karega)
+stellar keys generate admin
+
+# Dono ko fund (activate) karein
+stellar keys fund issuer
+stellar keys fund admin
+Step 2: Issuer Configuration (Control Rules)
+Ye step zaroori hai agar aap chahte hain ke baad mein aap kisi player ka balance "Clawback" (wapas khinchna) ya "Freeze" kar saken.
+
+Bash
+# Issuer account ko default sign-in ke liye set karein
+stellar keys use issuer
+
+# Revocable aur Clawback enable karein
+stellar tx new set-options \
+  --set-revocable \
+  --set-clawback-enabled
+Step 3: Asset Contract Deploy Karna
+Ab hum is classic asset ko Soroban contract mein badlenge.
+
+Bash
+# Asset ID calculate aur deploy (ZITOKEN:issuer)
+# Alias ka naam hum 'zitoken_id' rakh rahe hain
+stellar contract asset deploy \
+  --asset ZITOKEN:issuer \
+  --alias zitoken_id
+Step 4: Admin Transfer
+Abhi tak Issuer hi admin hai. Hum control admin account ko de dete hain (jo humne Step 1 mein banaya tha).
+
+Bash
+stellar contract invoke \
+  --source issuer \
+  --id zitoken_id \
+  -- \
+  set_admin \
+  --new_admin admin
+Step 5: Minting aur Testing (Admin Action)
+Ab hum check karte hain ke kya Admin naye tokens mint kar sakta hai.
+
+Bash
+# Ek user account banayein jisay token milenge
+stellar keys generate player1
+stellar keys fund player1
+
+# Player ko pehle Trustline banani hogi (Classic Requirement)
+stellar keys use player1
+stellar tx new change-trust --line ZITOKEN:issuer
+
+# Admin tokens mint karega player1 ko (Amount 100.0000000)
+stellar keys use admin
+stellar contract invoke \
+  --id zitoken_id \
+  -- \
+  mint \
+  --to player1 \
+  --amount 1000000000
+Step 6: Balance Check
+Dekhte hain ke player1 ke paas tokens aaye ya nahi:
+
+Bash
+stellar contract invoke \
+  --id zitoken_id \
+  -- \
+  balance \
+  --id player1
+Summary Checklist:
+issuer = Token ka asli malik (Sirf setup ke liye).
+
+admin = Contract ka manager (Mint/Clawback ke liye).
+
+zitoken_id = Yeh woh ID hai jo aap apne Game Contract ke initialize function mein as a token_id use karenge.
+
+Ab aapka naya ZITOKEN tayyar hai!
+
+
+# Admin account ko active karein
+stellar keys use admin
+
+# 50 Tokens mint karein player1 ko (Decimals ka khayal rakhein, usually 7 hote hain)
+stellar contract invoke \
+  --id zitoken_id \
+  --network testnet \
+  -- \
+  mint \
+  --to player1 \
+  --amount 500000000
